@@ -7,6 +7,7 @@ export async function getEvents(filters: EventFilters = {}): Promise<Event[]> {
     .from("events")
     .select("*")
     .eq("is_approved", true)
+    .order("is_featured", { ascending: false })
     .order("datetime_start", { ascending: true });
 
   if (filters.city) query = query.eq("city", filters.city);

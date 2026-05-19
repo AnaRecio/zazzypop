@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { Check, X, MapPin, Clock, ExternalLink, Pencil, Search } from "lucide-react";
+import { Check, X, MapPin, Clock, ExternalLink, Pencil, Search, Star } from "lucide-react";
 import type { Event } from "@/lib/types";
 import { CITIES } from "@/lib/types";
 
@@ -116,6 +116,17 @@ export default function AdminPage() {
   const saveAndApprove = async (id: string) => {
     const ok = await saveEdit(id);
     if (ok) await approve(id);
+  };
+
+  const toggleFeature = async (id: string, current: boolean) => {
+    setActionIds((s) => new Set(s).add(id));
+    await fetch("/api/admin/feature", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-admin-password": pw },
+      body: JSON.stringify({ id, featured: !current }),
+    });
+    setEvents((evs) => evs.map((e) => e.id === id ? { ...e, is_featured: !current } : e));
+    setActionIds((s) => { const n = new Set(s); n.delete(id); return n; });
   };
 
   if (!authed) {
@@ -238,10 +249,21 @@ export default function AdminPage() {
                     </>
                   )}
                   {tab === "published" && (
-                    <button onClick={() => reject(event.id)} disabled={busy || isEditing}
-                      className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 disabled:opacity-50 text-red-600 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
-                      <X className="w-4 h-4" /> Eliminar
-                    </button>
+                    <>
+                      <button onClick={() => toggleFeature(event.id, event.is_featured)} disabled={busy || isEditing}
+                        className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl transition-colors disabled:opacity-50 ${
+                          event.is_featured
+                            ? "bg-orange-500 hover:bg-orange-600 text-white"
+                            : "bg-orange-50 hover:bg-orange-100 text-orange-600"
+                        }`}>
+                        <Star className="w-4 h-4" fill={event.is_featured ? "currentColor" : "none"} />
+                        {event.is_featured ? "Destacado" : "Destacar"}
+                      </button>
+                      <button onClick={() => reject(event.id)} disabled={busy || isEditing}
+                        className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 disabled:opacity-50 text-red-600 text-sm font-medium px-4 py-2 rounded-xl transition-colors">
+                        <X className="w-4 h-4" /> Eliminar
+                      </button>
+                    </>
                   )}
                   <button
                     onClick={() => isEditing ? cancelEdit() : startEdit(event)}
