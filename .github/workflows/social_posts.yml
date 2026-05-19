@@ -1,0 +1,28 @@
+name: Weekly Social Posts
+
+on:
+  schedule:
+    - cron: "0 14 * * 1"   # Every Monday 8 AM Costa Rica (UTC-6)
+  workflow_dispatch:         # Manual trigger from GitHub UI
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install pillow requests
+
+      - name: Generate posts and send email
+        run: python social/generate_posts.py
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          SOCIAL_EMAIL: ${{ secrets.SOCIAL_EMAIL }}
