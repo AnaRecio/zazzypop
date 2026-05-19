@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -22,7 +23,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <p className="font-semibold text-gray-700 mb-1">
               zazzy<span className="text-orange-500">pop</span>
             </p>
-            <p>¿Qué hacemos hoy? · Costa Rica</p>
+            <p className="mb-3">¿Qué hacemos hoy? · Costa Rica</p>
+            <div className="flex justify-center gap-6">
+              <Link href="/nosotros" className="hover:text-gray-600 transition-colors">Acerca de</Link>
+              <Link href="/privacidad" className="hover:text-gray-600 transition-colors">Privacidad</Link>
+              <Link href="/publicar" className="hover:text-gray-600 transition-colors">Publicar evento</Link>
+            </div>
           </div>
         </footer>
       </body>
