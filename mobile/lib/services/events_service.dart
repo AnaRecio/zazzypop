@@ -15,21 +15,19 @@ class EventsService {
     var query = _db
         .from('events')
         .select()
-        .eq('is_approved', true)
-        .order('datetime_start', ascending: true);
+        .eq('is_approved', true);
 
     if (city != null) query = query.eq('city', city);
     if (isFree == true) query = query.eq('is_free', true);
     if (maxPrice != null) query = query.lte('price_min', maxPrice);
     if (category != null) query = query.contains('category', [category]);
-    if (dateFrom != null) {
-      query = query.gte('datetime_start', dateFrom.toIso8601String());
-    }
-    if (dateTo != null) {
-      query = query.lte('datetime_start', dateTo.toIso8601String());
-    }
+    if (dateFrom != null) query = query.gte('datetime_start', dateFrom.toIso8601String());
+    if (dateTo != null) query = query.lte('datetime_start', dateTo.toIso8601String());
 
-    final data = await query.limit(100);
+    final data = await query
+        .order('datetime_start', ascending: true)
+        .limit(100);
+
     return data.map((m) => Event.fromMap(m)).toList();
   }
 

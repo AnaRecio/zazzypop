@@ -16,6 +16,25 @@ const _categories = [
   ('talleres', '🛠️ Talleres'),
 ];
 
+typedef _DateRange = ({DateTime? from, DateTime? to});
+
+_DateRange _resolveWhen(String? when) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  if (when == 'hoy') return (from: today, to: today.add(const Duration(days: 1)));
+  if (when == 'mañana') {
+    final t = today.add(const Duration(days: 1));
+    return (from: t, to: t.add(const Duration(days: 1)));
+  }
+  if (when == 'finde') {
+    final daysUntilFri = (5 - now.weekday + 7) % 7;
+    final fri = today.add(Duration(days: daysUntilFri == 0 ? 7 : daysUntilFri));
+    return (from: fri, to: fri.add(const Duration(days: 3)));
+  }
+  if (when == 'semana') return (from: today, to: today.add(const Duration(days: 7)));
+  return (from: null, to: null);
+}
+
 class EventosScreen extends StatefulWidget {
   final bool initialIsFree;
   final int? initialMaxPrice;
@@ -30,6 +49,7 @@ class _EventosScreenState extends State<EventosScreen> {
   String? _category;
   late bool _isFree;
   int? _maxPrice;
+  String? _when;
   late Future<List<Event>> _future;
 
   @override
@@ -41,14 +61,22 @@ class _EventosScreenState extends State<EventosScreen> {
   }
 
   void _load() {
+    final range = _resolveWhen(_when);
     setState(() {
       _future = EventsService.getEvents(
         city: _city,
         category: _category,
         isFree: _isFree ? true : null,
         maxPrice: _maxPrice,
+        dateFrom: range.from,
+        dateTo: range.to,
       );
     });
+  }
+
+  void _setWhen(String? val) {
+    setState(() => _when = _when == val ? null : val);
+    _load();
   }
 
   @override
@@ -57,39 +85,63 @@ class _EventosScreenState extends State<EventosScreen> {
       appBar: AppBar(title: const Text('Explorar eventos')),
       body: Column(
         children: [
-          // Filter bar
-          SizedBox(
-            height: 50,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          Container(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+            ),
+            child: Column(
               children: [
-                _FilterChip(
-                  label: _city ?? 'Toda CR',
-                  active: _city != null,
-                  onTap: () => _showCityPicker(),
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: '🆓 Gratis',
-                  active: _isFree,
-                  onTap: () { setState(() => _isFree = !_isFree); _load(); },
-                ),
-                const SizedBox(width: 8),
-                _FilterChip(
-                  label: '₡ -10,000',
-                  active: _maxPrice == 10000,
-                  onTap: () { setState(() => _maxPrice = _maxPrice == 10000 ? null : 10000); _load(); },
-                ),
-                const SizedBox(width: 8),
-                ..._categories.map((cat) => Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _FilterChip(
-                    label: cat.$2,
-                    active: _category == cat.$1,
-                    onTap: () { setState(() => _category = _category == cat.$1 ? null : cat.$1); _load(); },
+                // Row 1: date filters
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 4),
+                  child: Row(
+                    children: [
+                      _FilterChip(label: '⚡ Hoy', active: _when == 'hoy', onTap: () => _setWhen('hoy')),
+                      const SizedBox(width: 8),
+                      _FilterChip(label: '📅 Mañana', active: _when == 'mañana', onTap: () => _setWhen('mañana')),
+                      const SizedBox(width: 8),
+                      _FilterChip(label: '🎉 Este finde', active: _when == 'finde', onTap: () => _setWhen('finde')),
+                      const SizedBox(width: 8),
+                      _FilterChip(label: '📆 Esta semana', active: _when == 'semana', onTap: () => _setWhen('semana')),
+                    ],
                   ),
-                )),
+                ),
+                // Row 2: other filters
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+                  child: Row(
+                    children: [
+                      _FilterChip(
+                        label: '📍 ${_city ?? 'Toda CR'}',
+                        active: _city != null,
+                        onTap: () => _showCityPicker(),
+                      ),
+                      const SizedBox(width: 8),
+                      _FilterChip(
+                        label: '🆓 Gratis',
+                        active: _isFree,
+                        onTap: () { setState(() => _isFree = !_isFree); _load(); },
+                      ),
+                      const SizedBox(width: 8),
+                      _FilterChip(
+                        label: '₡ -10,000',
+                        active: _maxPrice == 10000,
+                        onTap: () { setState(() => _maxPrice = _maxPrice == 10000 ? null : 10000); _load(); },
+                      ),
+                      const SizedBox(width: 8),
+                      ..._categories.map((cat) => Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: _FilterChip(
+                          label: cat.$2,
+                          active: _category == cat.$1,
+                          onTap: () { setState(() => _category = _category == cat.$1 ? null : cat.$1); _load(); },
+                        ),
+                      )),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -114,16 +166,11 @@ class _EventosScreenState extends State<EventosScreen> {
                     ),
                   );
                 }
-                return GridView.builder(
+                return ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.72,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                  ),
                   itemCount: events.length,
-                  itemBuilder: (_, i) => EventCard(event: events[i]),
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (_, i) => EventCard(event: events[i], fullWidth: true),
                 );
               },
             ),

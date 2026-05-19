@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,17 +21,13 @@ class EventDetailScreen extends StatelessWidget {
             expandedHeight: 220,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: event.imageUrl != null
-                  ? Image.network(event.imageUrl!, fit: BoxFit.cover)
-                  : Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xFFFED7AA), Color(0xFFFBCFE8)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                    ),
+              background: event.imageUrl != null && !kIsWeb
+                  ? Image.network(
+                      event.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => _heroPlaceholder(),
+                    )
+                  : _heroPlaceholder(),
             ),
             actions: [
               IconButton(
@@ -141,6 +138,16 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 }
+
+Widget _heroPlaceholder() => Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFFFED7AA), Color(0xFFFBCFE8)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+    );
 
 class _InfoRow extends StatelessWidget {
   final IconData icon;

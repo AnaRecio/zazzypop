@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -23,8 +24,9 @@ const _categoryEmojis = {
 class EventCard extends StatelessWidget {
   final Event event;
   final bool featured;
+  final bool fullWidth;
 
-  const EventCard({super.key, required this.event, this.featured = false});
+  const EventCard({super.key, required this.event, this.featured = false, this.fullWidth = false});
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +53,11 @@ class EventCard extends StatelessWidget {
           children: [
             // Image
             AspectRatio(
-              aspectRatio: 16 / 9,
+              aspectRatio: fullWidth ? 21 / 9 : 16 / 9,
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  event.imageUrl != null
+                  event.imageUrl != null && !kIsWeb
                       ? CachedNetworkImage(
                           imageUrl: event.imageUrl!,
                           fit: BoxFit.cover,

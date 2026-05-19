@@ -31,6 +31,7 @@ Thumbs.db
 mobile/lib/config.dart
 mobile/.dart_tool/
 mobile/build/
+mobile/android/local.properties
 
 # ── Logs ────────────────────────────────────────────────────
 *.log
