@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
-import { Check, X, MapPin, Clock, ExternalLink, Pencil } from "lucide-react";
+import { Check, X, MapPin, Clock, ExternalLink, Pencil, Search } from "lucide-react";
 import type { Event } from "@/lib/types";
 import { CITIES } from "@/lib/types";
 
@@ -33,6 +33,7 @@ export default function AdminPage() {
   const [actionIds, setActionIds] = useState<Set<string>>(new Set());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<EditDraft | null>(null);
+  const [search, setSearch] = useState("");
 
   const fetchEvents = (view: Tab, password = pw) => {
     setLoading(true);
@@ -167,6 +168,16 @@ export default function AdminPage() {
         </button>
       </div>
 
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por nombre..."
+          className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400"
+        />
+      </div>
+
       {loading && <p className="text-gray-400">Cargando...</p>}
 
       {!loading && events.length === 0 && (
@@ -179,7 +190,7 @@ export default function AdminPage() {
       )}
 
       <div className="space-y-4">
-        {events.map((event) => {
+        {events.filter((e) => e.title.toLowerCase().includes(search.toLowerCase())).map((event) => {
           const busy = actionIds.has(event.id);
           const isEditing = editingId === event.id;
 
