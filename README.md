@@ -1,94 +1,93 @@
-# ZazzyPop — Eventos Cool en Costa Rica
+# ZazzyPop — Costa Rica Events
 
-Cartelera moderna de eventos pequeños y cool en Costa Rica: ferias, música en vivo, mercaditos, stand-up, talleres, brunch, cine al aire libre y más.
+Event listing platform for Costa Rica. Aggregates events from multiple sources into a filterable, searchable web app and mobile app.
 
-## Estructura
+## Structure
 
 ```
 eventos-cr/
 ├── web/          → Next.js 14 (App Router) + Tailwind + Supabase
 ├── mobile/       → Flutter (Android + iOS)
-├── scraper/      → Python: Eventbrite API + TicketCR + RSS feeds
-└── supabase/     → Migraciones SQL
+├── scraper/      → Python: Playwright scrapers + RSS feeds
+└── supabase/     → SQL migrations
 ```
 
-## Setup rápido
+## Setup
 
 ### 1. Supabase
-1. Crear proyecto en https://supabase.com
-2. Correr migraciones: `supabase/migrations/001_initial_schema.sql`
-3. (Opcional) Correr datos de prueba: `002_seed_sample_events.sql`
+
+1. Create a project at https://supabase.com
+2. Run migrations: `supabase/migrations/001_initial_schema.sql`
+3. (Optional) Seed sample data: `002_seed_sample_events.sql`
 
 ### 2. Web (Next.js)
+
 ```bash
 cd web
 cp .env.local.example .env.local
-# Llenar credenciales de Supabase en .env.local
+# Fill in Supabase credentials in .env.local
 npm install
 npm run dev        # http://localhost:3000
 ```
 
-**Páginas:**
-- `/` — Home: "Qué hacer hoy", eventos destacados, este finde
-- `/eventos` — Listado filtrable con FilterBar
-- `/evento/[id]` — Detalle de evento
-- `/mapa` — Vista mapa con Leaflet + OpenStreetMap
-- `/publicar` — Formulario para organizadores (entrada libre)
-- `/admin` — Panel de aprobación (contraseña: `zazzy2024`, cambiar en `.env.local`)
+**Pages:**
+- `/` — Home: today's events, featured, this weekend
+- `/eventos` — Filterable event listing
+- `/evento/[id]` — Event detail
+- `/mapa` — Map view (Leaflet + OpenStreetMap)
+- `/publicar` — Organizer submission form
+- `/admin` — Approval queue (password set in `.env.local`)
 
-**Deploy:** Vercel (conectar repo, agregar env vars)
+**Deploy:** Vercel — set root directory to `web/`, add environment variables.
 
 ### 3. Scraper (Python)
+
 ```bash
 cd scraper
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 playwright install chromium
 cp .env.example .env
-# Llenar credenciales en .env
+# Fill in credentials in .env
 
-# Correr una vez
+# Run once
 python scheduler.py --once
 
-# Correr cada 8 horas (producción)
+# Run on a schedule (every 8 hours)
 python scheduler.py
 ```
 
-**Fuentes incluidas:**
-- Eventbrite API (legal, gratis — necesita token)
-- TicketCR.com (Playwright headless)
-- RSS de CRhoy y Semanario UCR
+**Sources:**
+- Eventbrite (JSON-LD, Playwright)
+- GAM Cultural (`gamcultural.com/cr`)
+- MCJ (`agenda.mcj.go.cr` — Ministry of Culture)
+- eTicket CR (sports events)
+- A Buen Paso (running events)
 
-**Deploy del scraper:** Railway o Render (agregar env vars, start command: `python scheduler.py`)
+**Automated scraping:** GitHub Actions (`.github/workflows/scraper.yml`) runs every 8 hours. Add `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` as repository secrets.
 
-### 4. Flutter (Android)
+### 4. Flutter (Android / iOS)
+
 ```bash
 cd mobile
-# Instalar Flutter: https://docs.flutter.dev/get-started/install/macos
-flutter create . --org com.zazzypop --project-name eventos_cr
 flutter pub get
-# Editar lib/config.dart con credenciales de Supabase
+# Edit lib/config.dart with Supabase credentials
 flutter run
 ```
 
-## Variables de entorno
+## Environment Variables
 
 **web/.env.local:**
 ```
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
-NEXT_PUBLIC_ADMIN_PASSWORD=tu-password-admin
+NEXT_PUBLIC_ADMIN_PASSWORD=...
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
 ```
 
 **scraper/.env:**
 ```
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
-EVENTBRITE_API_TOKEN=...   # Gratis en eventbrite.com/platform
 ```
-
-## Monetización (roadmap)
-1. **Hoy**: Google AdSense (web) + AdMob (Android)
-2. **Mes 3**: Eventos destacados — SINPE manual, ₡5,000–₡25,000
-3. **Mes 6**: Premium users — ₡2,000/mes sin ads + filtros extra
