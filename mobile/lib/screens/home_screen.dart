@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Eventos cool en toda Costa Rica',
+                    'Eventos en toda Costa Rica',
                     style: TextStyle(fontSize: 15, color: Color(0xFF6B7280)),
                   ),
                   const SizedBox(height: 16),

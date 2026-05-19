@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'config.dart';
 import 'screens/home_screen.dart';
 import 'screens/eventos_screen.dart';
@@ -7,6 +8,7 @@ import 'screens/mapa_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es', null);
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
   runApp(const ZazzyPopApp());
 }
