@@ -23,7 +23,17 @@ DARK   = "#7C2D12"
 WHITE  = "#FFFFFF"
 CREAM  = "#FFF7ED"
 
-FONT_PATH = "/System/Library/Fonts/HelveticaNeue.ttc"
+import platform
+if platform.system() == "Darwin":
+    FONT_REGULAR = "/System/Library/Fonts/HelveticaNeue.ttc"
+    FONT_BOLD    = "/System/Library/Fonts/HelveticaNeue.ttc"
+    FONT_IDX_REG = 0
+    FONT_IDX_BLD = 1
+else:
+    FONT_REGULAR = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+    FONT_BOLD    = "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+    FONT_IDX_REG = 0
+    FONT_IDX_BLD = 0
 
 # ── Supabase fetch ─────────────────────────────────────────
 def fetch_events():
@@ -77,8 +87,8 @@ def make_base(size=1080):
     return img, d
 
 def draw_logo(d):
-    fl = ImageFont.truetype(FONT_PATH, 42, index=1)
-    ft = ImageFont.truetype(FONT_PATH, 26, index=0)
+    fl = ImageFont.truetype(FONT_BOLD, 42, index=FONT_IDX_BLD)
+    ft = ImageFont.truetype(FONT_REGULAR, 26, index=FONT_IDX_REG)
     d.text((54, 44), "zazzy", font=fl, fill=WHITE)
     w = d.textlength("zazzy", font=fl)
     d.text((54 + w, 44), "pop", font=fl, fill=CREAM)
@@ -87,9 +97,9 @@ def draw_logo(d):
 def gen_post1(events, week_label):
     img, d = make_base()
     draw_logo(d)
-    fb = ImageFont.truetype(FONT_PATH, 50, index=1)
-    fs = ImageFont.truetype(FONT_PATH, 28, index=0)
-    ft = ImageFont.truetype(FONT_PATH, 24, index=0)
+    fb = ImageFont.truetype(FONT_BOLD, 50, index=FONT_IDX_BLD)
+    fs = ImageFont.truetype(FONT_REGULAR, 28, index=FONT_IDX_REG)
+    ft = ImageFont.truetype(FONT_REGULAR, 24, index=FONT_IDX_REG)
     d.text((54, 180), f"Esta semana en San José", font=fb, fill=WHITE)
     d.text((54, 244), "hay para todos los gustos 👇", font=fb, fill=CREAM)
     y = 340
@@ -110,9 +120,9 @@ def gen_post2(events):
     e = events[0] if events else None
     img, d = make_base()
     draw_logo(d)
-    fb = ImageFont.truetype(FONT_PATH, 60, index=1)
-    fm = ImageFont.truetype(FONT_PATH, 38, index=0)
-    fs = ImageFont.truetype(FONT_PATH, 28, index=0)
+    fb = ImageFont.truetype(FONT_BOLD, 60, index=FONT_IDX_BLD)
+    fm = ImageFont.truetype(FONT_REGULAR, 38, index=FONT_IDX_REG)
+    fs = ImageFont.truetype(FONT_REGULAR, 28, index=FONT_IDX_REG)
     if e:
         title = e["title"][:36]
         d.text((54, 190), title, font=fb, fill=WHITE)
@@ -126,10 +136,10 @@ def gen_post2(events):
 def gen_post3(free_events):
     img, d = make_base()
     draw_logo(d)
-    fb = ImageFont.truetype(FONT_PATH, 54, index=1)
-    fm = ImageFont.truetype(FONT_PATH, 34, index=0)
-    fs = ImageFont.truetype(FONT_PATH, 28, index=0)
-    ft = ImageFont.truetype(FONT_PATH, 26, index=0)
+    fb = ImageFont.truetype(FONT_BOLD, 54, index=FONT_IDX_BLD)
+    fm = ImageFont.truetype(FONT_REGULAR, 34, index=FONT_IDX_REG)
+    fs = ImageFont.truetype(FONT_REGULAR, 28, index=FONT_IDX_REG)
+    ft = ImageFont.truetype(FONT_REGULAR, 26, index=FONT_IDX_REG)
     d.text((54, 190), "Planes GRATIS", font=fb, fill=WHITE)
     d.text((54, 258), "esta semana en CR 🙌", font=fb, fill=CREAM)
     y = 360
@@ -145,10 +155,10 @@ def gen_post3(free_events):
 def gen_post4():
     img, d = make_base()
     draw_logo(d)
-    fb = ImageFont.truetype(FONT_PATH, 52, index=1)
-    fm = ImageFont.truetype(FONT_PATH, 36, index=0)
-    fs = ImageFont.truetype(FONT_PATH, 28, index=0)
-    ft = ImageFont.truetype(FONT_PATH, 28, index=0)
+    fb = ImageFont.truetype(FONT_BOLD, 52, index=FONT_IDX_BLD)
+    fm = ImageFont.truetype(FONT_REGULAR, 36, index=FONT_IDX_REG)
+    fs = ImageFont.truetype(FONT_REGULAR, 28, index=FONT_IDX_REG)
+    ft = ImageFont.truetype(FONT_REGULAR, 28, index=FONT_IDX_REG)
     d.text((54, 200), "¿Nunca sabés qué hacer", font=fb, fill=WHITE)
     d.text((54, 264), "el finde?", font=fb, fill=CREAM)
     d.text((54, 370), "ZazzyPop centraliza todos los", font=fm, fill=WHITE)
@@ -169,9 +179,9 @@ def gen_post5(events):
     # Weekend / Friday picks
     img, d = make_base()
     draw_logo(d)
-    fb = ImageFont.truetype(FONT_PATH, 54, index=1)
-    fm = ImageFont.truetype(FONT_PATH, 36, index=0)
-    fs = ImageFont.truetype(FONT_PATH, 28, index=0)
+    fb = ImageFont.truetype(FONT_BOLD, 54, index=FONT_IDX_BLD)
+    fm = ImageFont.truetype(FONT_REGULAR, 36, index=FONT_IDX_REG)
+    fs = ImageFont.truetype(FONT_REGULAR, 28, index=FONT_IDX_REG)
     d.text((54, 190), "Este finde en San José 🌙", font=fb, fill=WHITE)
     y = 310
     for e in events[:4]:
