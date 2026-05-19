@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase";
 
-const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "analilliam.recio@gmail.com";
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL ?? "hola@zazzypop-cr.app";
 
 export async function POST(req: Request) {
   const body = await req.json();
