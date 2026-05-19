@@ -16,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${geist.variable} h-full antialiased`} style={{ colorScheme: "light" }}>
       <head>
+        <meta name="google-adsense-account" content="ca-pub-5677922460404407" />
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5677922460404407" crossOrigin="anonymous" />
       </head>
       <body className="min-h-full flex flex-col bg-gray-50 text-gray-900">
