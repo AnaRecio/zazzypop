@@ -122,7 +122,13 @@ class EventbriteScraper(BaseScraper):
 
         try:
             dt_start = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
-            dt_end = datetime.fromisoformat(end_str.replace("Z", "+00:00")) if end_str else None
+            if dt_start.tzinfo is None:
+                dt_start = dt_start.replace(tzinfo=timezone.utc)
+            dt_end = None
+            if end_str:
+                dt_end = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+                if dt_end.tzinfo is None:
+                    dt_end = dt_end.replace(tzinfo=timezone.utc)
         except ValueError:
             return None
 
