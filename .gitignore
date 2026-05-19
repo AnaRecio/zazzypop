@@ -27,6 +27,11 @@ web/*.tsbuildinfo
 **/.DS_Store
 Thumbs.db
 
+# ── Flutter ─────────────────────────────────────────────────
+mobile/lib/config.dart
+mobile/.dart_tool/
+mobile/build/
+
 # ── Logs ────────────────────────────────────────────────────
 *.log
 npm-debug.log*
