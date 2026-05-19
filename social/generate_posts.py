@@ -29,14 +29,15 @@ FONT_PATH = "/System/Library/Fonts/HelveticaNeue.ttc"
 def fetch_events():
     now = datetime.now(timezone.utc)
     week_end = now + timedelta(days=8)
-    params = {
-        "is_approved": "eq.true",
-        "datetime_start": f"gte.{now.isoformat()}",
-        "order": "is_featured.desc,datetime_start.asc",
-        "limit": "60",
-        "select": "title,datetime_start,city,category,is_free,price_min,venue_name,source_url",
-    }
-    url = f"{SUPABASE_URL}/rest/v1/events?{urlencode(params)}&datetime_start=lte.{week_end.isoformat()}"
+    params = [
+        ("is_approved", "eq.true"),
+        ("datetime_start", f"gte.{now.isoformat()}"),
+        ("datetime_start", f"lte.{week_end.isoformat()}"),
+        ("order", "is_featured.desc,datetime_start.asc"),
+        ("limit", "60"),
+        ("select", "title,datetime_start,city,category,is_free,price_min,venue_name,source_url"),
+    ]
+    url = f"{SUPABASE_URL}/rest/v1/events?{urlencode(params)}"
     req = Request(url, headers={
         "apikey": SUPABASE_KEY,
         "Authorization": f"Bearer {SUPABASE_KEY}",
