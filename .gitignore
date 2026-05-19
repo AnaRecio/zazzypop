@@ -1,0 +1,33 @@
+# ── Env / secrets ──────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.production
+# Allow example templates
+!.env.example
+!.env.local.example
+
+# ── Python scraper ──────────────────────────────────────────
+scraper/venv/
+scraper/__pycache__/
+scraper/**/__pycache__/
+scraper/*.pyc
+scraper/.python-version
+
+# ── Next.js / Node ─────────────────────────────────────────
+web/node_modules/
+web/.next/
+web/out/
+web/.vercel/
+web/next-env.d.ts
+web/*.tsbuildinfo
+
+# ── OS ──────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# ── Logs ────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-error.log*
