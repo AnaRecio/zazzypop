@@ -7,13 +7,46 @@ import BackButton from "@/components/BackButton";
 import { parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { formatInTimeZone } from "date-fns-tz";
+import type { Metadata } from "next";
 
 const CR_TZ = "America/Costa_Rica";
 import { getEventById } from "@/lib/events";
 import { CATEGORIES } from "@/lib/types";
 
+const SITE = "https://zazzypop-cr.app";
+
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const event = await getEventById(id);
+  if (!event) return {};
+
+  const description = event.description
+    ? event.description.slice(0, 155)
+    : `${event.is_free ? "Gratis" : `Desde ₡${event.price_min.toLocaleString()}`} · ${event.venue_name}, ${event.city}`;
+
+  return {
+    title: `${event.title} | ZazzyPop`,
+    description,
+    openGraph: {
+      title: event.title,
+      description,
+      url: `${SITE}/evento/${event.id}`,
+      siteName: "ZazzyPop",
+      images: event.image_url ? [{ url: event.image_url }] : [],
+      locale: "es_CR",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: event.title,
+      description,
+      images: event.image_url ? [event.image_url] : [],
+    },
+  };
 }
 
 export default async function EventoPage({ params }: PageProps) {
@@ -31,7 +64,41 @@ export default async function EventoPage({ params }: PageProps) {
     ? `₡${event.price_min.toLocaleString()} – ₡${event.price_max.toLocaleString()}`
     : `Desde ₡${event.price_min.toLocaleString()}`;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description ?? undefined,
+    startDate: event.datetime_start,
+    endDate: event.datetime_end ?? undefined,
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: {
+      "@type": "Place",
+      name: event.venue_name,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: event.address,
+        addressLocality: event.city,
+        addressCountry: "CR",
+      },
+      ...(event.lat && event.lng ? { geo: { "@type": "GeoCoordinates", latitude: event.lat, longitude: event.lng } } : {}),
+    },
+    offers: {
+      "@type": "Offer",
+      price: event.is_free ? "0" : String(event.price_min),
+      priceCurrency: "CRC",
+      availability: "https://schema.org/InStock",
+      url: event.source_url ?? `${SITE}/evento/${event.id}`,
+    },
+    image: event.image_url ?? undefined,
+    url: `${SITE}/evento/${event.id}`,
+    organizer: { "@type": "Organization", name: "ZazzyPop", url: SITE },
+  };
+
   return (
+    <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <div className="max-w-3xl mx-auto px-4 py-8">
       <BackButton />
 
@@ -148,6 +215,7 @@ export default async function EventoPage({ params }: PageProps) {
         </div>
       )}
     </div>
+    </>
   );
 }
 
