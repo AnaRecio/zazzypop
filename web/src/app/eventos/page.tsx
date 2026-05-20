@@ -6,6 +6,9 @@ import EventCard from "@/components/EventCard";
 import { getEvents } from "@/lib/events";
 import type { EventCategory, EventFilters } from "@/lib/types";
 import { startOfDay, endOfDay, addDays } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+const CR_TZ = "America/Costa_Rica";
 
 interface PageProps {
   searchParams: Promise<{
@@ -19,28 +22,36 @@ interface PageProps {
   }>;
 }
 
+function crDay(d: Date) {
+  return toZonedTime(d, CR_TZ);
+}
+function crRange(start: Date, end: Date) {
+  return {
+    date_from: fromZonedTime(startOfDay(crDay(start)), CR_TZ).toISOString(),
+    date_to: fromZonedTime(endOfDay(crDay(end)), CR_TZ).toISOString(),
+  };
+}
+
 function resolveDateRange(when?: string, date?: string): { date_from?: string; date_to?: string } {
   if (date) {
     const d = new Date(date + "T12:00:00");
-    return { date_from: startOfDay(d).toISOString(), date_to: endOfDay(d).toISOString() };
+    return crRange(d, d);
   }
   const now = new Date();
-  if (when === "today") {
-    return { date_from: startOfDay(now).toISOString(), date_to: endOfDay(now).toISOString() };
-  }
+  if (when === "today") return crRange(now, now);
   if (when === "tomorrow") {
-    const tmrw = addDays(now, 1);
-    return { date_from: startOfDay(tmrw).toISOString(), date_to: endOfDay(tmrw).toISOString() };
+    const tmrw = addDays(crDay(now), 1);
+    return crRange(tmrw, tmrw);
   }
   if (when === "weekend") {
-    const day = now.getDay();
-    const daysUntilFri = (5 - day + 7) % 7 || 7;
-    const friday = addDays(now, daysUntilFri);
+    const nowCR = crDay(now);
+    const daysUntilFri = (5 - nowCR.getDay() + 7) % 7 || 7;
+    const friday = addDays(nowCR, daysUntilFri);
     const sunday = addDays(friday, 2);
-    return { date_from: startOfDay(friday).toISOString(), date_to: endOfDay(sunday).toISOString() };
+    return crRange(friday, sunday);
   }
   if (when === "week") {
-    return { date_from: now.toISOString(), date_to: addDays(now, 7).toISOString() };
+    return { date_from: now.toISOString(), date_to: addDays(crDay(now), 7).toISOString() };
   }
   return {};
 }
