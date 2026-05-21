@@ -1,6 +1,15 @@
 import { supabase } from "./supabase";
 import type { Event, EventFilters } from "./types";
 import { startOfDay, endOfDay, addDays } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+const CR_TZ = "America/Costa_Rica";
+function crRange(start: Date, end: Date) {
+  return {
+    date_from: fromZonedTime(startOfDay(toZonedTime(start, CR_TZ)), CR_TZ).toISOString(),
+    date_to: fromZonedTime(endOfDay(toZonedTime(end, CR_TZ)), CR_TZ).toISOString(),
+  };
+}
 
 export async function getEvents(filters: EventFilters = {}): Promise<Event[]> {
   let query = supabase
@@ -38,29 +47,22 @@ export async function getEventById(id: string): Promise<Event | null> {
 
 export async function getTodayEvents(): Promise<Event[]> {
   const now = new Date();
-  return getEvents({
-    date_from: startOfDay(now).toISOString(),
-    date_to: endOfDay(now).toISOString(),
-  });
+  return getEvents(crRange(now, now));
 }
 
 export async function getWeekendEvents(): Promise<Event[]> {
   const now = new Date();
-  const day = now.getDay();
-  const daysUntilFri = (5 - day + 7) % 7 || 7;
-  const friday = addDays(now, daysUntilFri);
-  const sunday = addDays(friday, 2);
-  return getEvents({
-    date_from: startOfDay(friday).toISOString(),
-    date_to: endOfDay(sunday).toISOString(),
-  });
+  const nowCR = toZonedTime(now, CR_TZ);
+  const daysUntilFri = (5 - nowCR.getDay() + 7) % 7 || 7;
+  const friday = addDays(nowCR, daysUntilFri);
+  return getEvents(crRange(friday, addDays(friday, 2)));
 }
 
 export async function getWeekEvents(): Promise<Event[]> {
   const now = new Date();
   return getEvents({
     date_from: now.toISOString(),
-    date_to: addDays(now, 7).toISOString(),
+    date_to: addDays(toZonedTime(now, CR_TZ), 7).toISOString(),
   });
 }
 

@@ -21,8 +21,8 @@ class EventsService {
     if (isFree == true) query = query.eq('is_free', true);
     if (maxPrice != null) query = query.lte('price_min', maxPrice);
     if (category != null) query = query.contains('category', [category]);
-    if (dateFrom != null) query = query.gte('datetime_start', dateFrom.toIso8601String());
-    if (dateTo != null) query = query.lte('datetime_start', dateTo.toIso8601String());
+    if (dateFrom != null) query = query.gte('datetime_start', dateFrom.toUtc().toIso8601String());
+    if (dateTo != null) query = query.lte('datetime_start', dateTo.toUtc().toIso8601String());
 
     final data = await query
         .order('datetime_start', ascending: true)

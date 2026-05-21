@@ -6,6 +6,16 @@ import EventMapClient from "@/components/EventMapClient";
 import { getEvents } from "@/lib/events";
 import type { EventCategory, EventFilters } from "@/lib/types";
 import { startOfDay, endOfDay, addDays } from "date-fns";
+import { toZonedTime, fromZonedTime } from "date-fns-tz";
+
+const CR_TZ = "America/Costa_Rica";
+
+function crRange(start: Date, end: Date) {
+  return {
+    date_from: fromZonedTime(startOfDay(toZonedTime(start, CR_TZ)), CR_TZ).toISOString(),
+    date_to: fromZonedTime(endOfDay(toZonedTime(end, CR_TZ)), CR_TZ).toISOString(),
+  };
+}
 
 interface PageProps {
   searchParams: Promise<{
@@ -21,20 +31,21 @@ interface PageProps {
 function resolveDateRange(when?: string, date?: string): { date_from?: string; date_to?: string } {
   if (date) {
     const d = new Date(date + "T12:00:00");
-    return { date_from: startOfDay(d).toISOString(), date_to: endOfDay(d).toISOString() };
+    return crRange(d, d);
   }
   const now = new Date();
-  if (when === "today") return { date_from: startOfDay(now).toISOString(), date_to: endOfDay(now).toISOString() };
+  const nowCR = toZonedTime(now, CR_TZ);
+  if (when === "today") return crRange(now, now);
   if (when === "tomorrow") {
-    const t = addDays(now, 1);
-    return { date_from: startOfDay(t).toISOString(), date_to: endOfDay(t).toISOString() };
+    const t = addDays(nowCR, 1);
+    return crRange(t, t);
   }
   if (when === "weekend") {
-    const daysUntilFri = (5 - now.getDay() + 7) % 7 || 7;
-    const fri = addDays(now, daysUntilFri);
-    return { date_from: startOfDay(fri).toISOString(), date_to: endOfDay(addDays(fri, 2)).toISOString() };
+    const daysUntilFri = (5 - nowCR.getDay() + 7) % 7 || 7;
+    const fri = addDays(nowCR, daysUntilFri);
+    return crRange(fri, addDays(fri, 2));
   }
-  if (when === "week") return { date_from: now.toISOString(), date_to: addDays(now, 7).toISOString() };
+  if (when === "week") return { date_from: now.toISOString(), date_to: addDays(nowCR, 7).toISOString() };
   return {};
 }
 
