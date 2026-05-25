@@ -9,11 +9,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
   const { data: events } = await supabase
     .from("events")
     .select("id, created_at")
     .eq("is_approved", true)
-    .gte("datetime_start", new Date().toISOString())
+    .gte("datetime_start", thirtyDaysAgo.toISOString())
     .order("datetime_start", { ascending: true })
     .limit(500);
 

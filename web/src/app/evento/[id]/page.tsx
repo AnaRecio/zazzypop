@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 import { notFound } from "next/navigation";
 import { MapPin, Clock, ExternalLink, Tag } from "lucide-react";
@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${event.title} | ZazzyPop`,
     description,
+    alternates: { canonical: `${SITE}/evento/${event.id}` },
     openGraph: {
       title: event.title,
       description,

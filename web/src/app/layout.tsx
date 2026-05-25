@@ -7,9 +7,11 @@ import Link from "next/link";
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://zazzypop-cr.app"),
   title: "ZazzyPop — ¿Qué hacemos hoy?",
   description:
     "¿Qué hacemos hoy? Encontrá qué hacer en Costa Rica. Música, ferias, mercaditos, stand-up, talleres y más.",
+  alternates: { canonical: "https://zazzypop-cr.app" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
